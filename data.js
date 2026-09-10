@@ -73,14 +73,39 @@ function publicView(student) {
     torneos: student.torneos,
     posteos: student.posteos,
     pagoAlDia: student.pagoAlDia,
-    target: targetForLevel(level)
+    target: targetForLevel(level),
+    torneosTarget: 3,
+    posteosTarget: 3
   };
+}
+
+function slugify(text) {
+  return text
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // quita tildes
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+function uniqueSlug(db, nombre) {
+  const base = slugify(nombre) || 'alumno';
+  let slug = base;
+  let counter = 2;
+  while (db.students.some((s) => s.code === slug)) {
+    slug = `${base}-${counter}`;
+    counter++;
+  }
+  return slug;
 }
 
 function addStudent(db, nombre) {
   const student = {
     id: nanoid(8),
-    code: nanoid(6),
+    code: uniqueSlug(db, nombre),
     nombre,
     clases: 0,
     torneos: 0,
