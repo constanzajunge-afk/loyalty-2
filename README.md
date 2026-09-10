@@ -75,3 +75,4 @@ Una vez desplegado en Railway, puedes conectar un dominio propio (ej.
 `fidelizacion.m3padelacademy.cl`) desde la misma pestaña de configuración del
 proyecto en Railway, si compras un dominio en algún proveedor como NIC Chile
 o Namecheap.
+X
