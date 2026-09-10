@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel admin — M3 Padel Academy</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>Panel admin</h1>
+  <div class="sub">M3 Padel Academy — programa de fidelización</div>
+
+  <div id="login-view" class="login-box">
+    <input id="password" type="password" placeholder="Clave de administrador" />
+    <button onclick="login()">Entrar</button>
+    <div class="error" id="login-error"></div>
+  </div>
+
+  <div id="admin-view" style="display:none;">
+    <div class="add-form">
+      <input id="new-name" placeholder="Nombre del alumno" />
+      <button onclick="addStudent()">Agregar alumno</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Alumno</th><th>Nivel</th><th>Clases/trim.</th><th>Torneos</th><th>Posteos</th><th>Pago</th><th>Link tarjeta</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="student-table"></tbody>
+    </table>
+    <p style="margin-top:24px;"><button onclick="logout()">Cerrar sesión</button></p>
+  </div>
+</div>
+
+<script>
+const levelLabel = { bronce: 'Bronce', plata: 'Plata', oro: 'Oro' };
+const levelBadgeColor = { bronce: '#7c4a2d', plata: '#9a9a9a', oro: '#a8e02e' };
+const levelTextColor = { bronce: '#f5ded0', plata: '#1a1a1a', oro: '#1a2e05' };
+
+async function checkSession() {
+  const res = await fetch('/api/session');
+  const data = await res.json();
+  if (data.isAdmin) {
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('admin-view').style.display = 'block';
+    loadStudents();
+  }
+}
+
+async function login() {
+  const password = document.getElementById('password').value;
+  const res = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password })
+  });
+  if (res.ok) {
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('admin-view').style.display = 'block';
+    loadStudents();
+  } else {
+    document.getElementById('login-error').textContent = 'Clave incorrecta';
+  }
+}
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST' });
+  location.reload();
+}
+
+async function loadStudents() {
+  const res = await fetch('/api/students');
+  if (!res.ok) return;
+  const students = await res.json();
+  renderTable(students);
+}
+
+async function addStudent() {
+  const input = document.getElementById('new-name');
+  const nombre = input.value.trim();
+  if (!nombre) return;
+  await fetch('/api/students', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre })
+  });
+  input.value = '';
+  loadStudents();
+}
+
+async function updateField(id, field, delta) {
+  await fetch('/api/students/' + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ [field]: delta })
+  });
+  loadStudents();
+}
+
+async function togglePago(id, current) {
+  await fetch('/api/students/' + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pagoAlDia: !current })
+  });
+  loadStudents();
+}
+
+async function deleteStudent(id) {
+  await fetch('/api/students/' + id, { method: 'DELETE' });
+  loadStudents();
+}
+
+function copyLink(code) {
+  const url = location.origin + '/alumno.html?code=' + code;
+  navigator.clipboard.writeText(url);
+}
+
+function renderTable(students) {
+  const tbody = document.getElementById('student-table');
+  tbody.innerHTML = '';
+  students.forEach((s) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s.nombre}</td>
+      <td><span class="badge" style="background:${levelBadgeColor[s.level]};color:${levelTextColor[s.level]}">${levelLabel[s.level]}</span></td>
+      <td>
+        <button class="mini-btn" onclick="updateField('${s.id}','clases',-1)">-</button>
+        ${s.clases}
+        <button class="mini-btn" onclick="updateField('${s.id}','clases',1)">+</button>
+      </td>
+      <td>
+        <button class="mini-btn" onclick="updateField('${s.id}','torneos',-1)">-</button>
+        ${s.torneos}
+        <button class="mini-btn" onclick="updateField('${s.id}','torneos',1)">+</button>
+      </td>
+      <td>
+        <button class="mini-btn" onclick="updateField('${s.id}','posteos',-1)">-</button>
+        ${s.posteos}
+        <button class="mini-btn" onclick="updateField('${s.id}','posteos',1)">+</button>
+      </td>
+      <td><span class="pago-toggle" onclick="togglePago('${s.id}',${s.pagoAlDia})">${s.pagoAlDia ? '✅' : '⚠️'}</span></td>
+      <td><span class="link-cell" onclick="copyLink('${s.code}')">Copiar link</span></td>
+      <td><button class="del-btn" onclick="deleteStudent('${s.id}')">Eliminar</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+checkSession();
+</script>
+</body>
+</html>
