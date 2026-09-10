@@ -30,6 +30,10 @@
       </thead>
       <tbody id="student-table"></tbody>
     </table>
+    <div id="link-box" style="display:none; margin-top:16px; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:6px; padding:12px;">
+      <div style="font-size:12px; color:#8a8a8a; margin-bottom:6px;">Link para compartir:</div>
+      <input id="link-output" readonly style="width:100%; background:#0d0d0d; border:1px solid #2a2a2a; color:#a8e02e; padding:8px; border-radius:4px; font-size:12px;" onclick="this.select()" />
+    </div>
     <p style="margin-top:24px;"><button onclick="logout()">Cerrar sesión</button></p>
   </div>
 </div>
@@ -115,11 +119,12 @@ async function deleteStudent(id) {
 
 function copyLink(code) {
   const url = location.origin + '/alumno.html?code=' + code;
-  navigator.clipboard.writeText(url).then(() => {
-    alert('Link copiado:\n' + url);
-  }).catch(() => {
-    prompt('Copia este link manualmente:', url);
-  });
+  const box = document.getElementById('link-box');
+  const output = document.getElementById('link-output');
+  output.value = url;
+  box.style.display = 'block';
+  output.select();
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function renderTable(students) {
