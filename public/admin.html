@@ -115,8 +115,13 @@ async function deleteStudent(id) {
 
 function copyLink(code) {
   const url = location.origin + '/alumno.html?code=' + code;
-  navigator.clipboard.writeText(url);
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Link copiado:\n' + url);
+  }).catch(() => {
+    prompt('Copia este link manualmente:', url);
+  });
 }
+
 function renderTable(students) {
   const tbody = document.getElementById('student-table');
   tbody.innerHTML = '';
