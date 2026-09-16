@@ -69,11 +69,11 @@ async function load() {
         <div style="position:relative; height:8px; background:#334469; border-radius:4px; margin-bottom:6px;">
           <div style="position:absolute; left:0; top:0; height:100%; width:${pctToOro}%; background:#a8e02e; border-radius:4px;"></div>
           <div style="position:absolute; left:${plataMarkerPct}%; top:-3px; width:2px; height:14px; background:#ffffff;"></div>
-          <div style="position:absolute; left:100%; top:-3px; width:2px; height:14px; background:#ffffff; transform:translateX(-2px);"></div>
+          <div style="position:absolute; left:calc(100% - 2px); top:-3px; width:2px; height:14px; background:#ffffff;"></div>
         </div>
         <div style="position:relative; height:16px; margin-bottom:10px;">
           <span style="position:absolute; left:${plataMarkerPct}%; transform:translateX(-50%); font-size:9px; color:#4a4d52; background:#dcdee3; padding:1px 5px; border-radius:8px;">Plata ${PLATA_UMBRAL}</span>
-          <span style="position:absolute; left:100%; transform:translateX(-90%); font-size:9px; color:#6b4e00; background:#f6c94c; padding:1px 5px; border-radius:8px;">Oro ${ORO_UMBRAL}</span>
+          <span style="position:absolute; right:0; font-size:9px; color:#6b4e00; background:#f6c94c; padding:1px 5px; border-radius:8px;">Oro ${ORO_UMBRAL}</span>
         </div>
         <div style="color:#a9b4c9; font-size:11px;">${mensajeClases}</div>
       </div>
