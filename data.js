@@ -24,14 +24,14 @@ const LEVEL_INFO = {
   },
   plata: {
     label: 'Plata',
-    color: '#9a9a9a',
-    textColor: '#1a1a1a',
+    color: '#c0c4cc',
+    textColor: '#2c2e33',
     benefits: ['20% dto. indumentaria Trup', '1 polera trimestral']
   },
   oro: {
     label: 'Oro',
-    color: '#a8e02e',
-    textColor: '#1a2e05',
+    color: '#d4af37',
+    textColor: '#3d2e00',
     benefits: [
       '20% dto. indumentaria Trup',
       '1 polera trimestral',
@@ -41,25 +41,25 @@ const LEVEL_INFO = {
   }
 };
 
-// Reglas de negocio del programa de fidelizacion, evaluadas por trimestre:
-// - Plata: 12 clases en el trimestre y pagos al dia
-// - Oro: 21 clases, 3 torneos y 3 posteos en RR.SS. en el trimestre, y pagos al dia
+// Reglas de negocio del programa de fidelizacion, evaluadas por MES:
+// - Plata: 4 clases en el mes y pagos al dia
+// - Oro: 7 clases, 1 torneo y 1 posteo en RR.SS. en el mes, y pagos al dia
 function computeLevel(student) {
   const oro =
-    student.clases >= 21 &&
-    student.torneos >= 3 &&
-    student.posteos >= 3 &&
+    student.clases >= 7 &&
+    student.torneos >= 1 &&
+    student.posteos >= 1 &&
     student.pagoAlDia;
   if (oro) return 'oro';
 
-  const plata = student.clases >= 12 && student.pagoAlDia;
+  const plata = student.clases >= 4 && student.pagoAlDia;
   if (plata) return 'plata';
 
   return 'bronce';
 }
 
 function targetForLevel(level) {
-  return level === 'bronce' ? 12 : level === 'plata' ? 21 : 21;
+  return level === 'bronce' ? 4 : level === 'plata' ? 7 : 7;
 }
 
 function publicView(student) {
@@ -74,8 +74,8 @@ function publicView(student) {
     posteos: student.posteos,
     pagoAlDia: student.pagoAlDia,
     target: targetForLevel(level),
-    torneosTarget: 3,
-    posteosTarget: 3
+    torneosTarget: 1,
+    posteosTarget: 1
   };
 }
 
@@ -126,6 +126,11 @@ function updateStudent(db, id, changes) {
   return student;
 }
 
+function findStudentByName(db, nombre) {
+  const target = slugify(nombre);
+  return db.students.find((s) => slugify(s.nombre) === target);
+}
+
 function deleteStudent(db, id) {
   db.students = db.students.filter((s) => s.id !== id);
   saveDB(db);
@@ -139,5 +144,6 @@ module.exports = {
   addStudent,
   updateStudent,
   deleteStudent,
+  findStudentByName,
   LEVEL_INFO
 };
