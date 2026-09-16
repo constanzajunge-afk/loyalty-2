@@ -32,43 +32,72 @@ async function load() {
     return;
   }
   const s = await res.json();
-  const pct = Math.min(100, Math.round((s.clases / s.target) * 100));
-  const pagoBg = s.pagoAlDia ? '#e6f4d9' : '#fbe2e0';
-  const pagoText = s.pagoAlDia ? '#3f6b12' : '#a83232';
+  const PLATA_UMBRAL = 4;
+  const ORO_UMBRAL = 7;
+  const pctToOro = Math.min(100, Math.round((s.clases / ORO_UMBRAL) * 100));
+  const plataMarkerPct = Math.round((PLATA_UMBRAL / ORO_UMBRAL) * 100);
+  const pagoBg = s.pagoAlDia ? '#2d4a1e' : '#4a1e1e';
+  const pagoText = s.pagoAlDia ? '#a8e02e' : '#e87a7a';
+
+  let mensajeClases;
+  if (s.clases < PLATA_UMBRAL) {
+    mensajeClases = `Te faltan <b style="color:#ffffff">${PLATA_UMBRAL - s.clases} clases</b> para llegar a Plata.`;
+  } else if (s.clases < ORO_UMBRAL) {
+    mensajeClases = `Te faltan <b style="color:#ffffff">${ORO_UMBRAL - s.clases} clases</b> para llegar a Oro.`;
+  } else {
+    mensajeClases = `Ya cumpliste el requisito de clases para Oro este mes.`;
+  }
 
   area.innerHTML = `
     <div class="card-front">
       <div class="card-head">
-        <img src="/logo.png" alt="M3 Padel Academy" class="card-logo">
+        <img src="/logo-blanco.png" alt="M3 Padel Academy" class="card-logo">
         <span class="badge" style="background:${s.levelInfo.color};color:${s.levelInfo.textColor}">${s.levelInfo.label}</span>
       </div>
       <div>
         <div class="name">${s.nombre}</div>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="color:var(--text-muted); font-size:11px;">Estado de pago</span>
+        <span style="color:#a9b4c9; font-size:11px;">Estado de pago</span>
         <span class="badge" style="background:${pagoBg};color:${pagoText};">${s.pagoAlDia ? 'Al día' : 'Pendiente'}</span>
       </div>
       <div>
-        <div class="progress-label">
-          <span style="color:var(--text-muted)">Clases este trimestre</span>
-          <span style="color:var(--accent-dark); font-weight:600">${s.clases} / ${s.target}</span>
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <span style="color:#a9b4c9; font-size:11px;">Clases este mes</span>
+          <span style="color:#a8e02e; font-weight:700; font-size:13px;">${s.clases} / ${ORO_UMBRAL}</span>
         </div>
-        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div style="position:relative; height:8px; background:#334469; border-radius:4px; margin-bottom:6px;">
+          <div style="position:absolute; left:0; top:0; height:100%; width:${pctToOro}%; background:#a8e02e; border-radius:4px;"></div>
+          <div style="position:absolute; left:${plataMarkerPct}%; top:-3px; width:2px; height:14px; background:#ffffff;"></div>
+          <div style="position:absolute; left:100%; top:-3px; width:2px; height:14px; background:#ffffff; transform:translateX(-2px);"></div>
+        </div>
+        <div style="position:relative; height:16px; margin-bottom:10px;">
+          <span style="position:absolute; left:${plataMarkerPct}%; transform:translateX(-50%); font-size:9px; color:#4a4d52; background:#dcdee3; padding:1px 5px; border-radius:8px;">Plata ${PLATA_UMBRAL}</span>
+          <span style="position:absolute; left:100%; transform:translateX(-90%); font-size:9px; color:#6b4e00; background:#f6c94c; padding:1px 5px; border-radius:8px;">Oro ${ORO_UMBRAL}</span>
+        </div>
+        <div style="color:#a9b4c9; font-size:11px;">${mensajeClases}</div>
       </div>
     </div>
     <div class="benefits">
-      <h3>Progreso hacia nivel Oro</h3>
-      <div class="progress-label">
-        <span style="color:var(--text-muted)">Torneos jugados</span>
-        <span style="color:var(--accent-dark); font-weight:600">${s.torneos} / ${s.torneosTarget}</span>
+      <h3>Otros requisitos para Oro (este mes)</h3>
+      <div style="display:flex; gap:16px;">
+        <div style="flex:1;">
+          <div style="text-align:center; margin-bottom:6px;">
+            <span style="color:#a8e02e; font-weight:700; font-size:14px;">${s.torneos}</span>
+            <span style="color:#a9b4c9; font-size:11px;"> / ${s.torneosTarget}</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, Math.round((s.torneos / s.torneosTarget) * 100))}%"></div></div>
+          <div style="text-align:center; color:#a9b4c9; font-size:10px; margin-top:4px;">Torneos</div>
+        </div>
+        <div style="flex:1;">
+          <div style="text-align:center; margin-bottom:6px;">
+            <span style="color:#a8e02e; font-weight:700; font-size:14px;">${s.posteos}</span>
+            <span style="color:#a9b4c9; font-size:11px;"> / ${s.posteosTarget}</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, Math.round((s.posteos / s.posteosTarget) * 100))}%"></div></div>
+          <div style="text-align:center; color:#a9b4c9; font-size:10px; margin-top:4px;">Posteos</div>
+        </div>
       </div>
-      <div class="progress-track" style="margin-bottom:14px;"><div class="progress-fill" style="width:${Math.min(100, Math.round((s.torneos / s.torneosTarget) * 100))}%"></div></div>
-      <div class="progress-label">
-        <span style="color:var(--text-muted)">Posteos en RR.SS.</span>
-        <span style="color:var(--accent-dark); font-weight:600">${s.posteos} / ${s.posteosTarget}</span>
-      </div>
-      <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, Math.round((s.posteos / s.posteosTarget) * 100))}%"></div></div>
     </div>
     <div class="benefits" style="margin-top:16px;">
       <h3>Beneficios nivel ${s.levelInfo.label}</h3>
